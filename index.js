@@ -15,10 +15,8 @@ server.get('/', (req, res) => {
 });
 
 // C - Create
-server.post('/api/posts', (req, res) => {
+server.post('/api/posts', async (req, res) => {
     const newPost = req.body;
-
-    // console.log(newPost)
 
     db
         .insert(newPost)
@@ -40,36 +38,23 @@ server.post('/api/posts', (req, res) => {
 });
 
 // Ra - Read All
-server.get('/api/posts', (req, res) => {
-    db
-        .find()
-        .then(posts => {
-            posts ?
-                res.status(200).json(posts)
-            :
-                res.status(404).json({
-                    message: "Posts not Found"
-                })
-        })
-        .catch(err => res.status(500).json(err));
+server.get('/api/posts', async (req, res) => {
+    try {
+        const posts = await db.find();
+
+        posts ?
+            res.status(200).json(posts) :
+            res.status(404).json({
+                message: "Posts not Found"
+            })
+    } catch (err) {
+        res.status(500).json(err)
+    }
 });
 
 // R - Read
 server.get('/api/posts/:id', async (req, res) => {
     const id = req.params.id;
-
-    // db
-    //     .findById(id)
-    //     .then(post => {
-    //         console.log(post)
-    //         post.length > 0 ?
-    //             res.status(200).json(post)
-    //             :
-    //             res.status(404).json({
-    //                 message: `No post with id: ${id}`
-    //             });
-    //     })
-    //     .catch(err => res.status(500).json(err));
     
     try {
         post = await db.findById(id);
@@ -102,7 +87,23 @@ server.put('/api/posts/:id', async (req, res) => {
 });
 
 // D - Delete
-
+server.delete('/api/posts/:id', async (req, res) => {
+    const id = req.params.id;
+    
+    db
+        .findById(id)
+        .then(post => {
+            post ?
+                db
+                    .remove(id)
+                    .then(count => res.status(200).json(post))
+                :
+                res.status(404).json({
+                    message: 'User not found'
+                })
+        })
+        .catch(err => res.status(500).json(err));
+})
 // watch for connections on port 5000
 server.listen(5000, () =>
     console.log('Server running on http://localhost:5000')
