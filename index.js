@@ -25,8 +25,8 @@ server.post('/api/posts', (req, res) => {
         .then(result => {
             db
                 .findById(result.id)
-                .then(user => {
-                    res.status(201).json(user);
+                .then(post => {
+                    res.status(201).json(post);
                 })
                 .catch(err => res.status(500).json({
                     message: 'Id was not attached to new note',
@@ -55,24 +55,51 @@ server.get('/api/posts', (req, res) => {
 });
 
 // R - Read
-server.get('/api/posts/:id', (req, res) => {
+server.get('/api/posts/:id', async (req, res) => {
     const id = req.params.id;
 
-    db
-        .findById(id)
-        .then(post => {
-            console.log(post)
-            post.length > 0 ?
-                res.status(200).json(post)
-                :
-                res.status(404).json({
-                    message: `No post with id: ${id}`
-                });
+    // db
+    //     .findById(id)
+    //     .then(post => {
+    //         console.log(post)
+    //         post.length > 0 ?
+    //             res.status(200).json(post)
+    //             :
+    //             res.status(404).json({
+    //                 message: `No post with id: ${id}`
+    //             });
+    //     })
+    //     .catch(err => res.status(500).json(err));
+    
+    try {
+        post = await db.findById(id);
+
+        post.length > 0 ?
+            res.status(200).json(post)
+            :
+            res.status(400).json({
+            message: `No post with id: ${id}`
         })
-        .catch(err => res.status(500).json(err));
+    } catch (err) {
+        res.status(500).json(err)
+    }
 });
 
 // U - Update
+server.put('/api/posts/:id', async (req, res) => {
+    const id = req.params.id;
+    const updatedPost = req.body;
+
+    try {
+        const result = await db.update(id, updatedPost);
+
+        const post = await db.findById(result);
+
+        res.status(200).json(post);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
 // D - Delete
 
