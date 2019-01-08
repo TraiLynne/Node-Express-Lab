@@ -7,12 +7,37 @@ const express = require('express'); // import the express package
 
 const server = express(); // creates the server
 
+server.use(express.json());
+
 // handle requests to the root of the api, the / route
 server.get('/', (req, res) => {
     res.send('Hello from Express');
 });
 
 // C - Create
+server.post('/api/posts', (req, res) => {
+    const newPost = req.body;
+
+    // console.log(newPost)
+
+    db
+        .insert(newPost)
+        .then(result => {
+            db
+                .findById(result.id)
+                .then(user => {
+                    res.status(201).json(user);
+                })
+                .catch(err => res.status(500).json({
+                    message: 'Id was not attached to new note',
+                    error: err
+                }))
+        })
+        .catch(err => res.status(500).json({
+            message: 'New Post Creation Failed',
+            error: err
+        }));
+});
 
 // Ra - Read All
 server.get('/api/posts', (req, res) => {
