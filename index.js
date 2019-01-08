@@ -30,6 +30,22 @@ server.get('/api/posts', (req, res) => {
 });
 
 // R - Read
+server.get('/api/posts/:id', (req, res) => {
+    const id = req.params.id;
+
+    db
+        .findById(id)
+        .then(post => {
+            console.log(post)
+            post.length > 0 ?
+                res.status(200).json(post)
+                :
+                res.status(404).json({
+                    message: `No post with id: ${id}`
+                });
+        })
+        .catch(err => res.status(500).json(err));
+});
 
 // U - Update
 
